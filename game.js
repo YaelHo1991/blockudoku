@@ -10,6 +10,8 @@ class Blockudoku {
         this.selectedPiece = null;
         this.draggedElement = null;
         this.touchOffset = { x: 0, y: 0 };
+        this.lastPreviewRow = -1;
+        this.lastPreviewCol = -1;
 
         // Undo system
         this.undoStack = [];
@@ -420,21 +422,23 @@ class Blockudoku {
         e.preventDefault();
 
         const touch = e.touches[0];
-        // Offset to show piece above finger (so user can see where they're placing)
-        const touchOffsetY = 100;
+
+        // Position piece so its center is above the finger
+        const pieceWidth = this.draggedElement.offsetWidth;
+        const pieceHeight = this.draggedElement.offsetHeight;
+        const offsetY = 80; // How far above finger to show piece
 
         this.draggedElement.style.position = 'fixed';
-        this.draggedElement.style.left = `${touch.clientX - this.draggedElement.offsetWidth / 2}px`;
-        this.draggedElement.style.top = `${touch.clientY - this.draggedElement.offsetHeight - touchOffsetY}px`;
+        this.draggedElement.style.left = `${touch.clientX - pieceWidth / 2}px`;
+        this.draggedElement.style.top = `${touch.clientY - pieceHeight - offsetY}px`;
         this.draggedElement.style.zIndex = '1000';
 
-        // Preview position should match where piece will actually land
-        // The piece's top-left corner determines placement, so we calculate from there
-        const pieceTop = touch.clientY - this.draggedElement.offsetHeight - touchOffsetY;
-        const pieceLeft = touch.clientX - this.draggedElement.offsetWidth / 2;
+        // Store current preview position based on where piece visually is
+        const pieceRect = this.draggedElement.getBoundingClientRect();
+        const { row, col } = this.getCellFromPoint(pieceRect.left + 10, pieceRect.top + 10);
 
-        // Find cell at the top-left of where the piece appears
-        const { row, col } = this.getCellFromPoint(pieceLeft + 15, pieceTop + 15);
+        this.lastPreviewRow = row;
+        this.lastPreviewCol = col;
 
         this.clearPreview();
         if (row >= 0 && col >= 0 && row < this.boardSize && col < this.boardSize) {
@@ -446,12 +450,9 @@ class Blockudoku {
         if (!this.draggedElement) return;
         e.preventDefault();
 
-        const touch = e.changedTouches[0];
-        const touchOffsetY = 100;
-
-        // Calculate where the piece actually is on screen
-        const pieceTop = touch.clientY - this.draggedElement.offsetHeight - touchOffsetY;
-        const pieceLeft = touch.clientX - this.draggedElement.offsetWidth / 2;
+        // Use the last preview position - this is exactly where the user saw it would go
+        const row = this.lastPreviewRow;
+        const col = this.lastPreviewCol;
 
         this.draggedElement.classList.remove('dragging');
         this.draggedElement.style.position = '';
@@ -459,15 +460,14 @@ class Blockudoku {
         this.draggedElement.style.top = '';
         this.draggedElement.style.zIndex = '';
 
-        // Find cell at the top-left of where the piece appears
-        const { row, col } = this.getCellFromPoint(pieceLeft + 15, pieceTop + 15);
-
         if (row >= 0 && col >= 0 && row < this.boardSize && col < this.boardSize) {
             this.tryPlacePiece(row, col);
         }
 
         this.clearPreview();
         this.draggedElement = null;
+        this.lastPreviewRow = -1;
+        this.lastPreviewCol = -1;
     }
 
     // Get exact cell coordinates from a point
