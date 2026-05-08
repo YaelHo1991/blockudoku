@@ -423,14 +423,14 @@ class Blockudoku {
 
         const touch = e.touches[0];
 
-        // Position piece so its center is above the finger
+        // Position piece BELOW and slightly offset from finger
+        // This way the finger doesn't block the view of the board
         const pieceWidth = this.draggedElement.offsetWidth;
-        const pieceHeight = this.draggedElement.offsetHeight;
-        const offsetY = 80; // How far above finger to show piece
+        const offsetY = 30; // Small offset below finger
 
         this.draggedElement.style.position = 'fixed';
         this.draggedElement.style.left = `${touch.clientX - pieceWidth / 2}px`;
-        this.draggedElement.style.top = `${touch.clientY - pieceHeight - offsetY}px`;
+        this.draggedElement.style.top = `${touch.clientY + offsetY}px`;
         this.draggedElement.style.zIndex = '1000';
 
         // Store current preview position based on where piece visually is
