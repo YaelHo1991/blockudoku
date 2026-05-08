@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Blockudoku</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="header">
+            <div class="daily-challenge">
+                <div class="calendar-icon">📅</div>
+                <div class="challenge-text">אתגר יומי</div>
+                <div class="challenge-date" id="currentDate"></div>
+                <button class="play-btn" id="dailyChallenge">שחק</button>
+            </div>
+        </header>
+
+        <div class="score-section">
+            <div class="current-score">
+                <span class="score-label">ניקוד</span>
+                <span class="score-value" id="currentScore">0</span>
+            </div>
+            <div class="best-score">
+                <span class="best-label">שיא</span>
+                <div class="best-value">
+                    <span id="bestScore">0</span>
+                    <span class="trophy">🏆</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-board-wrapper">
+            <div class="game-board" id="gameBoard"></div>
+        </div>
+
+        <div class="pieces-container" id="piecesContainer"></div>
+
+        <div class="buttons-container">
+            <button class="new-game-btn" id="newGameBtn">משחק חדש</button>
+            <button class="undo-btn" id="undoBtn" disabled>
+                <span class="undo-icon">↩</span>
+                <span class="undo-count" id="undoCount">3</span>
+            </button>
+        </div>
+
+        <div class="game-over-modal" id="gameOverModal">
+            <div class="modal-content">
+                <h2>המשחק נגמר!</h2>
+                <p>הניקוד שלך: <span id="finalScore">0</span></p>
+                <p id="newRecordMsg" class="hidden">🎉 שיא חדש! 🎉</p>
+                <button class="new-game-btn" id="playAgainBtn">שחק שוב</button>
+            </div>
+        </div>
+
+        <div class="mode-selection-modal" id="modeSelectionModal">
+            <div class="modal-content mode-content">
+                <h2>בחר מצב משחק</h2>
+                <div class="mode-options">
+                    <button class="mode-btn" data-mode="easy">
+                        <span class="mode-icon">😊</span>
+                        <span class="mode-title">קל</span>
+                        <span class="mode-desc">רק צורות קטנות וקלות</span>
+                    </button>
+                    <button class="mode-btn" data-mode="classic">
+                        <span class="mode-icon">🎮</span>
+                        <span class="mode-title">קלאסי</span>
+                        <span class="mode-desc">כל הצורות באקראי</span>
+                    </button>
+                    <button class="mode-btn" data-mode="hard">
+                        <span class="mode-icon">💪</span>
+                        <span class="mode-title">קשה</span>
+                        <span class="mode-desc">רק צורות גדולות ומאתגרות</span>
+                    </button>
+                    <button class="mode-btn" data-mode="progressive">
+                        <span class="mode-icon">📈</span>
+                        <span class="mode-title">מתקדם</span>
+                        <span class="mode-desc">מתחיל קל ונהיה קשה יותר</span>
+                    </button>
+                    <button class="mode-btn" data-mode="weighted">
+                        <span class="mode-icon">⚖️</span>
+                        <span class="mode-title">מאוזן</span>
+                        <span class="mode-desc">60% קל, 30% בינוני, 10% קשה</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
