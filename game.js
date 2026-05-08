@@ -420,13 +420,21 @@ class Blockudoku {
         e.preventDefault();
 
         const touch = e.touches[0];
+        // Offset to show piece above finger (so user can see where they're placing)
+        const touchOffsetY = 100;
+
         this.draggedElement.style.position = 'fixed';
         this.draggedElement.style.left = `${touch.clientX - this.draggedElement.offsetWidth / 2}px`;
-        this.draggedElement.style.top = `${touch.clientY - this.draggedElement.offsetHeight - 60}px`;
+        this.draggedElement.style.top = `${touch.clientY - this.draggedElement.offsetHeight - touchOffsetY}px`;
         this.draggedElement.style.zIndex = '1000';
 
-        // Show preview on board - find exact cell under finger
-        const { row, col } = this.getCellFromPoint(touch.clientX, touch.clientY - 60);
+        // Preview position should match where piece will actually land
+        // The piece's top-left corner determines placement, so we calculate from there
+        const pieceTop = touch.clientY - this.draggedElement.offsetHeight - touchOffsetY;
+        const pieceLeft = touch.clientX - this.draggedElement.offsetWidth / 2;
+
+        // Find cell at the top-left of where the piece appears
+        const { row, col } = this.getCellFromPoint(pieceLeft + 15, pieceTop + 15);
 
         this.clearPreview();
         if (row >= 0 && col >= 0 && row < this.boardSize && col < this.boardSize) {
@@ -439,6 +447,11 @@ class Blockudoku {
         e.preventDefault();
 
         const touch = e.changedTouches[0];
+        const touchOffsetY = 100;
+
+        // Calculate where the piece actually is on screen
+        const pieceTop = touch.clientY - this.draggedElement.offsetHeight - touchOffsetY;
+        const pieceLeft = touch.clientX - this.draggedElement.offsetWidth / 2;
 
         this.draggedElement.classList.remove('dragging');
         this.draggedElement.style.position = '';
@@ -446,8 +459,8 @@ class Blockudoku {
         this.draggedElement.style.top = '';
         this.draggedElement.style.zIndex = '';
 
-        // Find exact cell under touch
-        const { row, col } = this.getCellFromPoint(touch.clientX, touch.clientY - 60);
+        // Find cell at the top-left of where the piece appears
+        const { row, col } = this.getCellFromPoint(pieceLeft + 15, pieceTop + 15);
 
         if (row >= 0 && col >= 0 && row < this.boardSize && col < this.boardSize) {
             this.tryPlacePiece(row, col);
