@@ -426,21 +426,30 @@ class Blockudoku {
         const pieceWidth = this.draggedElement.offsetWidth;
         const offsetY = 30;
 
-        // Map finger position to piece position with amplification for edges
-        // When finger is at center, piece is at center
-        // When finger moves toward edges, piece moves faster to reach board edges
-        const fingerX = touch.clientX;
-        const centerX = screenWidth / 2;
-        const distanceFromCenter = fingerX - centerX;
+        // Get board boundaries
+        const board = document.getElementById('gameBoard');
+        const boardRect = board.getBoundingClientRect();
 
-        // Amplify horizontal movement (1.5x) so piece reaches edges easier
-        const amplifiedX = centerX + (distanceFromCenter * 1.5);
+        // Map finger X position to piece position
+        // Finger range: 40px from left edge to 40px from right edge
+        // Piece range: board left edge to board right edge
+        const fingerMin = 40;
+        const fingerMax = screenWidth - 40;
+        const fingerRange = fingerMax - fingerMin;
 
-        // Clamp to keep piece on screen
-        const pieceX = Math.max(0, Math.min(screenWidth - pieceWidth, amplifiedX - pieceWidth / 2));
+        const pieceMin = boardRect.left;
+        const pieceMax = boardRect.right - pieceWidth;
+        const pieceRange = pieceMax - pieceMin;
+
+        // Normalize finger position and map to piece position
+        const fingerNormalized = (touch.clientX - fingerMin) / fingerRange;
+        const pieceX = pieceMin + (fingerNormalized * pieceRange);
+
+        // Clamp to valid range
+        const clampedPieceX = Math.max(pieceMin, Math.min(pieceMax, pieceX));
 
         this.draggedElement.style.position = 'fixed';
-        this.draggedElement.style.left = `${pieceX}px`;
+        this.draggedElement.style.left = `${clampedPieceX}px`;
         this.draggedElement.style.top = `${touch.clientY + offsetY}px`;
         this.draggedElement.style.zIndex = '1000';
 
