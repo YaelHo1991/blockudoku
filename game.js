@@ -442,17 +442,15 @@ class Blockudoku {
         const deltaX = touch.clientX - this.touchStartX;
         const deltaY = this.touchStartY - touch.clientY; // Positive = finger moved up
 
-        // Map X: finger at left edge -> piece at left of board, etc.
-        const joystickXMin = 20;
-        const joystickXMax = window.innerWidth - 20;
-        const joystickXRange = joystickXMax - joystickXMin;
-
+        // X position: use relative movement from start position
+        // Finger starts wherever it touched, piece starts at center of board
         const boardXMin = boardRect.left;
         const boardXMax = boardRect.right - pieceWidth;
-        const boardXRange = boardXMax - boardXMin;
+        const boardXCenter = (boardXMin + boardXMax) / 2;
 
-        const normalizedX = (touch.clientX - joystickXMin) / joystickXRange;
-        const pieceX = boardXMin + (normalizedX * boardXRange);
+        // Sensitivity for horizontal movement - amplify finger movement
+        const xSensitivity = 2.0;
+        const pieceX = boardXCenter + (deltaX * xSensitivity);
         const clampedX = Math.max(boardXMin, Math.min(boardXMax, pieceX));
 
         // Y position: start at bottom of board, move up as finger moves up
