@@ -423,7 +423,7 @@ class Blockudoku {
 
         const touch = e.touches[0];
 
-        // Get board and joystick area boundaries
+        // Get board boundaries
         const board = document.getElementById('gameBoard');
         const boardRect = board.getBoundingClientRect();
         const piecesContainer = document.getElementById('piecesContainer');
@@ -432,8 +432,17 @@ class Blockudoku {
         const pieceWidth = this.draggedElement.offsetWidth;
         const pieceHeight = this.draggedElement.offsetHeight;
 
-        // Joystick area: the pieces container and below
-        // Map joystick X (full width) to board X range
+        // Remember the starting touch position on first move
+        if (!this.touchStartY) {
+            this.touchStartY = touch.clientY;
+            this.touchStartX = touch.clientX;
+        }
+
+        // Calculate how much finger moved from start
+        const deltaX = touch.clientX - this.touchStartX;
+        const deltaY = this.touchStartY - touch.clientY; // Positive = finger moved up
+
+        // Map X: finger at left edge -> piece at left of board, etc.
         const joystickXMin = 20;
         const joystickXMax = window.innerWidth - 20;
         const joystickXRange = joystickXMax - joystickXMin;
@@ -442,24 +451,18 @@ class Blockudoku {
         const boardXMax = boardRect.right - pieceWidth;
         const boardXRange = boardXMax - boardXMin;
 
-        // Normalize and map X
         const normalizedX = (touch.clientX - joystickXMin) / joystickXRange;
         const pieceX = boardXMin + (normalizedX * boardXRange);
         const clampedX = Math.max(boardXMin, Math.min(boardXMax, pieceX));
 
-        // Map joystick Y to board Y range
-        // When finger is at top of joystick area -> piece at top of board
-        // When finger is at bottom of screen -> piece at bottom of board
-        const joystickYMin = joystickRect.top - 50; // A bit above pieces container
-        const joystickYMax = window.innerHeight;
-        const joystickYRange = joystickYMax - joystickYMin;
+        // Y position: start at bottom of board, move up as finger moves up
+        // Sensitivity: 1.5x so small finger movements = larger piece movements
+        const sensitivity = 1.5;
+        const boardYMax = boardRect.bottom - pieceHeight; // Bottom of board
+        const boardYMin = boardRect.top; // Top of board
 
-        const boardYMin = boardRect.top;
-        const boardYMax = boardRect.bottom - pieceHeight;
-        const boardYRange = boardYMax - boardYMin;
-
-        const normalizedY = (touch.clientY - joystickYMin) / joystickYRange;
-        const pieceY = boardYMin + (normalizedY * boardYRange);
+        // Start from bottom, subtract delta (moving finger up = piece moves up)
+        const pieceY = boardYMax - (deltaY * sensitivity);
         const clampedY = Math.max(boardYMin, Math.min(boardYMax, pieceY));
 
         this.draggedElement.style.position = 'fixed';
@@ -502,6 +505,8 @@ class Blockudoku {
         this.draggedElement = null;
         this.lastPreviewRow = -1;
         this.lastPreviewCol = -1;
+        this.touchStartY = null;
+        this.touchStartX = null;
     }
 
     // Get exact cell coordinates from a point
