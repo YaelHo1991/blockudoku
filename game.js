@@ -422,35 +422,49 @@ class Blockudoku {
         e.preventDefault();
 
         const touch = e.touches[0];
-        const screenWidth = window.innerWidth;
-        const pieceWidth = this.draggedElement.offsetWidth;
-        const offsetY = 30;
 
-        // Get board boundaries
+        // Get board and joystick area boundaries
         const board = document.getElementById('gameBoard');
         const boardRect = board.getBoundingClientRect();
+        const piecesContainer = document.getElementById('piecesContainer');
+        const joystickRect = piecesContainer.getBoundingClientRect();
 
-        // Map finger X position to piece position
-        // Finger range: 40px from left edge to 40px from right edge
-        // Piece range: board left edge to board right edge
-        const fingerMin = 40;
-        const fingerMax = screenWidth - 40;
-        const fingerRange = fingerMax - fingerMin;
+        const pieceWidth = this.draggedElement.offsetWidth;
+        const pieceHeight = this.draggedElement.offsetHeight;
 
-        const pieceMin = boardRect.left;
-        const pieceMax = boardRect.right - pieceWidth;
-        const pieceRange = pieceMax - pieceMin;
+        // Joystick area: the pieces container and below
+        // Map joystick X (full width) to board X range
+        const joystickXMin = 20;
+        const joystickXMax = window.innerWidth - 20;
+        const joystickXRange = joystickXMax - joystickXMin;
 
-        // Normalize finger position and map to piece position
-        const fingerNormalized = (touch.clientX - fingerMin) / fingerRange;
-        const pieceX = pieceMin + (fingerNormalized * pieceRange);
+        const boardXMin = boardRect.left;
+        const boardXMax = boardRect.right - pieceWidth;
+        const boardXRange = boardXMax - boardXMin;
 
-        // Clamp to valid range
-        const clampedPieceX = Math.max(pieceMin, Math.min(pieceMax, pieceX));
+        // Normalize and map X
+        const normalizedX = (touch.clientX - joystickXMin) / joystickXRange;
+        const pieceX = boardXMin + (normalizedX * boardXRange);
+        const clampedX = Math.max(boardXMin, Math.min(boardXMax, pieceX));
+
+        // Map joystick Y to board Y range
+        // When finger is at top of joystick area -> piece at top of board
+        // When finger is at bottom of screen -> piece at bottom of board
+        const joystickYMin = joystickRect.top - 50; // A bit above pieces container
+        const joystickYMax = window.innerHeight;
+        const joystickYRange = joystickYMax - joystickYMin;
+
+        const boardYMin = boardRect.top;
+        const boardYMax = boardRect.bottom - pieceHeight;
+        const boardYRange = boardYMax - boardYMin;
+
+        const normalizedY = (touch.clientY - joystickYMin) / joystickYRange;
+        const pieceY = boardYMin + (normalizedY * boardYRange);
+        const clampedY = Math.max(boardYMin, Math.min(boardYMax, pieceY));
 
         this.draggedElement.style.position = 'fixed';
-        this.draggedElement.style.left = `${clampedPieceX}px`;
-        this.draggedElement.style.top = `${touch.clientY + offsetY}px`;
+        this.draggedElement.style.left = `${clampedX}px`;
+        this.draggedElement.style.top = `${clampedY}px`;
         this.draggedElement.style.zIndex = '1000';
 
         // Store current preview position based on where piece visually is
